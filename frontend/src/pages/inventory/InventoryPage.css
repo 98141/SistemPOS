@@ -1,6 +1,113 @@
-.basic-card {
+.inventory-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.inventory-top-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.inventory-card {
   background: #fff;
   padding: 20px;
   border-radius: 18px;
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+.inventory-card h3 {
+  margin-top: 0;
+}
+
+.inventory-card label {
+  display: block;
+  margin-bottom: 6px;
+  color: #374151;
+}
+
+.inventory-card input,
+.inventory-card select,
+.inventory-card textarea,
+.inventory-card button {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid #d1d5db;
+  margin-bottom: 12px;
+}
+
+.inventory-card textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+.inventory-card button {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+.table-responsive {
+  overflow-x: auto;
+}
+
+.inventory-card table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.inventory-card th,
+.inventory-card td {
+  text-align: left;
+  padding: 12px;
+  border-bottom: 1px solid #e5e7eb;
+  white-space: nowrap;
+}
+
+.badge {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.badge--success {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.badge--warning {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.badge--danger {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.movement-filter-grid {
+  display: grid;
+  grid-template-columns: 1fr 220px 180px;
+  gap: 12px;
+  align-items: end;
+}
+
+.empty-row {
+  text-align: center;
+  color: #6b7280;
+}
+
+@media (max-width: 1024px) {
+  .inventory-top-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .movement-filter-grid {
+    grid-template-columns: 1fr;
+  }
 }
