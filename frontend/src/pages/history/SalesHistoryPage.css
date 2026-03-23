@@ -1,6 +1,177 @@
-.basic-card {
+.sales-history-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.history-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
+  gap: 18px;
+}
+
+.history-card,
+.history-table-card,
+.history-filters {
   background: #fff;
-  padding: 20px;
   border-radius: 18px;
+  padding: 20px;
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+.history-card h3 {
+  margin: 0 0 10px;
+  color: #374151;
+}
+
+.history-card p {
+  margin: 0;
+  font-size: 1.7rem;
+  font-weight: 700;
+}
+
+.history-filters {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(180px, 1fr));
+  gap: 14px;
+  align-items: end;
+}
+
+.history-filters label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.92rem;
+  color: #374151;
+}
+
+.history-filters input,
+.history-filters select,
+.history-filters button {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid #d1d5db;
+}
+
+.history-filters button {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+.table-responsive {
+  overflow-x: auto;
+}
+
+.history-table-card table,
+.history-modal table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.history-table-card th,
+.history-table-card td,
+.history-modal th,
+.history-modal td {
+  padding: 12px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.detail-btn {
+  border: none;
+  background: #111827;
+  color: #fff;
+  padding: 10px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.empty-row {
+  text-align: center;
+  color: #6b7280;
+}
+
+.history-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.history-modal {
+  width: min(1100px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25);
+}
+
+.history-modal__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 20px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.history-modal__header h3 {
+  margin: 0;
+}
+
+.history-modal__header button {
+  border: none;
+  background: #dc2626;
+  color: #fff;
+  padding: 10px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.history-modal__body {
+  padding: 20px;
+}
+
+.history-modal__totals {
+  margin-top: 20px;
+  background: #f9fafb;
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.history-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 14px;
+}
+
+.pdf-btn {
+  border: none;
+  background: #16a34a;
+  color: #fff;
+  padding: 12px 14px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+@media (max-width: 1024px) {
+  .history-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .history-filters {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .history-filters {
+    grid-template-columns: 1fr;
+  }
 }
