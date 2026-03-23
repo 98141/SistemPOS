@@ -1,0 +1,65 @@
+.custom-orders-page .page-grid {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 20px;
+}
+
+.custom-orders-page .form-card,
+.custom-orders-page .table-card {
+  background: #fff;
+  padding: 20px;
+  border-radius: 18px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+.custom-orders-page .form-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.custom-orders-page input,
+.custom-orders-page select,
+.custom-orders-page textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+}
+
+.custom-orders-page textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.custom-orders-page button {
+  border: none;
+  background: #2563eb;
+  color: white;
+  padding: 12px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.custom-orders-page .table-responsive {
+  overflow-x: auto;
+}
+
+.custom-orders-page table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.custom-orders-page th,
+.custom-orders-page td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+  white-space: nowrap;
+}
+
+@media (max-width: 1000px) {
+  .custom-orders-page .page-grid {
+    grid-template-columns: 1fr;
+  }
+}
