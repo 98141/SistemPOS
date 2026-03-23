@@ -10,6 +10,7 @@ function SalesHistoryPage() {
     startDate: "",
     endDate: "",
     paymentMethod: "",
+    saleNumber: "",
   });
 
   const loadSales = async () => {
@@ -19,6 +20,7 @@ function SalesHistoryPage() {
       if (filters.startDate) params.startDate = filters.startDate;
       if (filters.endDate) params.endDate = filters.endDate;
       if (filters.paymentMethod) params.paymentMethod = filters.paymentMethod;
+      if (filters.saleNumber) params.saleNumber = filters.saleNumber;
 
       const { data } = await api.get("/sales", { params });
       setSales(data.data);
@@ -71,6 +73,16 @@ function SalesHistoryPage() {
       </div>
 
       <form className="history-filters" onSubmit={handleFilter}>
+        <div>
+          <label>Número de venta</label>
+          <input
+            type="text"
+            value={filters.saleNumber}
+            onChange={(e) =>
+              setFilters({ ...filters, saleNumber: e.target.value })
+            }
+          />
+        </div>
         <div>
           <label>Fecha inicio</label>
           <input
