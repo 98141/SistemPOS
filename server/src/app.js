@@ -19,12 +19,22 @@ import { errorHandler } from "./middlewares/errorHandler.js";
 
 const app = express();
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  process.env.FRONTEND_URL,
+];
+
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "https://sistem-nh3095j9y-armandos-projects-bfbd3d28.vercel.app"
-    ],
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("Not allowed by CORS"));
+    },
     credentials: false,
   })
 );
