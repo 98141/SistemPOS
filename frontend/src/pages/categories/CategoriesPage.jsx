@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
 import api from "../../api/axios";
+import Toast from "../../components/common/Toast";
+import { useToast } from "../../hoots/useToast";
 import "./CategoriesPage.css";
 
 function CategoriesPage() {
   const [form, setForm] = useState({ name: "", description: "" });
   const [categories, setCategories] = useState([]);
+  const [submitting, setSubmitting] = useState(false);
+  const { toast, showToast, clearToast } = useToast();
 
   const loadCategories = async () => {
     const { data } = await api.get("/categories");
@@ -17,9 +21,19 @@ function CategoriesPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await api.post("/categories", form);
-    setForm({ name: "", description: "" });
-    loadCategories();
+    if (submitting) return;
+
+    try {
+      setSubmitting(true);
+      const { data } = await api.post("/categories", form);
+      setCategories((prev) => [data.data, ...prev]);
+      setForm({ name: "", description: "" });
+      showToast("Categoría guardada correctamente");
+    } catch (error) {
+      showToast(error?.response?.data?.message || "Error guardando categoría");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -43,7 +57,9 @@ function CategoriesPage() {
             onChange={(e) => setForm({ ...form, description: e.target.value })}
           />
 
-          <button type="submit">Guardar</button>
+          <button type="submit" disabled={submitting}>
+            {submitting ? "Guardando..." : "Guardar"}
+          </button>
         </form>
 
         <div className="list-card">
@@ -58,7 +74,15 @@ function CategoriesPage() {
           </div>
         </div>
       </div>
+      {toast.message && (
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        onClose={clearToast}
+      />
+      )}
     </section>
+    
   );
 }
 

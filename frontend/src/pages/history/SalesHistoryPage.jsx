@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import api from "../../api/axios";
 import { exportSalesToPdf } from "../../utils/exportSalesToPDF";
+import Pagination from "../../components/common/Pagination";
+import { getPaymentMethodLabel, getMovementTypeLabel } from "../../utils/labels";
 import "./SalesHistoryPage.css";
 
 function SalesHistoryPage() {
@@ -12,6 +14,8 @@ function SalesHistoryPage() {
     paymentMethod: "",
     saleNumber: "",
   });
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const loadSales = async () => {
     try {
@@ -47,6 +51,13 @@ function SalesHistoryPage() {
       return acc + saleProfit;
     }, 0);
   }, [sales]);
+
+  const totalPages = Math.ceil(sales.length / itemsPerPage) || 1;
+
+  const paginatedSales = sales.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   const handleFilter = async (e) => {
     e.preventDefault();
@@ -152,7 +163,7 @@ function SalesHistoryPage() {
               </tr>
             </thead>
             <tbody>
-              {sales.map((sale) => (
+              {paginatedSales.map((sale) => (
                 <tr key={sale._id}>
                   <td>{sale.saleNumber}</td>
                   <td>{new Date(sale.date).toLocaleString("es-CO")}</td>

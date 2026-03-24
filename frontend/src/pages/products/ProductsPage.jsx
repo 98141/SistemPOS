@@ -5,6 +5,7 @@ import "./ProductsPage.css";
 function ProductsPage() {
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
+  const [submitting, setSubmitting] = useState(false);
 
   const [form, setForm] = useState({
     sku: "",
@@ -34,44 +35,76 @@ function ProductsPage() {
 
   const parseVariables = (text) => {
     if (!text.trim()) return [];
-    return text
+
+    const rawItems = text
       .split(",")
       .map((pair) => pair.trim())
-      .filter(Boolean)
-      .map((pair) => {
-        const [key, value] = pair.split(":");
-        return {
-          key: key?.trim() || "",
-          value: value?.trim() || "",
-        };
-      })
-      .filter((item) => item.key && item.value);
+      .filter(Boolean);
+
+    const parsed = rawItems.map((pair) => {
+      const [key, ...rest] = pair.split(":");
+      return {
+        key: (key || "").trim().toLowerCase(),
+        value: rest.join(":").trim(),
+      };
+    });
+
+    const invalid = parsed.find((item) => !item.key || !item.value);
+    if (invalid) {
+      throw new Error('Formato inválido en variables. Usa por ejemplo: color:café, tamaño:mediano');
+    }
+
+    const duplicatedKeys = new Set();
+    const seenKeys = new Set();
+
+    for (const item of parsed) {
+      if (seenKeys.has(item.key)) {
+        duplicatedKeys.add(item.key);
+      }
+      seenKeys.add(item.key);
+    }
+
+    if (duplicatedKeys.size > 0) {
+      throw new Error(`No repitas claves de variables: ${Array.from(duplicatedKeys).join(", ")}`);
+    }
+
+    return parsed;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (submitting) return;
 
-    await api.post("/products", {
-      ...form,
-      stock: Number(form.stock),
-      purchasePrice: Number(form.purchasePrice),
-      minStock: Number(form.minStock),
-      variables: parseVariables(form.variablesText),
-    });
+    try {
+      setSubmitting(true);
 
-    setForm({
-      sku: "",
-      name: "",
-      category: "",
-      stock: 0,
-      purchasePrice: 0,
-      unitMeasure: "",
-      minStock: 0,
-      description: "",
-      variablesText: "",
-    });
+      await api.post("/products", {
+        ...form,
+        stock: Number(form.stock),
+        purchasePrice: Number(form.purchasePrice),
+        minStock: Number(form.minStock),
+        variables: parseVariables(form.variablesText),
+      });
 
-    loadData();
+      setForm({
+        sku: "",
+        name: "",
+        category: "",
+        stock: 0,
+        purchasePrice: 0,
+        unitMeasure: "",
+        minStock: 0,
+        description: "",
+        variablesText: "",
+      });
+
+      await loadData();
+      alert("Producto guardado correctamente");
+    } catch (error) {
+      alert(error?.response?.data?.message || error.message || "Error guardando producto");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -158,7 +191,9 @@ function ProductsPage() {
             onChange={(e) => setForm({ ...form, description: e.target.value })}
           />
 
-          <button type="submit">Guardar producto</button>
+          <button type="submit" disabled={submitting}>
+            {submitting ? "Guardando..." : "Guardar producto"}
+          </button>
         </form>
 
         <div className="table-card">
@@ -173,6 +208,7 @@ function ProductsPage() {
                   <th>Stock</th>
                   <th>Unidad</th>
                   <th>Compra</th>
+                  <th>Variables</th>
                 </tr>
               </thead>
               <tbody>
@@ -184,6 +220,11 @@ function ProductsPage() {
                     <td>{item.stock}</td>
                     <td>{item.unitMeasure}</td>
                     <td>${item.purchasePrice}</td>
+                    <td>
+                      {item.variables?.length
+                        ? item.variables.map((v) => `${v.key}: ${v.value}`).join(", ")
+                        : "-"}
+                    </td>
                   </tr>
                 ))}
               </tbody>

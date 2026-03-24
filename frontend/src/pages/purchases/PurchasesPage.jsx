@@ -87,6 +87,7 @@ function PurchasesPage() {
   }, [cart]);
 
   const handleSubmit = async () => {
+    if (loading) return;
     const invalidItem = cart.find(
       (item) => Number(item.quantity) < 1 || Number(item.unitCost) < 0
     );
@@ -239,8 +240,8 @@ function PurchasesPage() {
                 type="button"
                 className="purchase-confirm-btn"
                 onClick={handleSubmit}
-                disabled={loading}
-              >
+                disabled={loading || cart.length === 0}
+                >
                 {loading ? "Guardando..." : "Registrar compra"}
               </button>
             </div>

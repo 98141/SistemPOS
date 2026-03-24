@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import api from "../../api/axios";
+import { getCustomOrderStatusLabel } from "../../utils/labels";
 import "./CustomOrdersPage.css";
 
 function CustomOrdersPage() {
   const [orders, setOrders] = useState([]);
+  const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
     productName: "",
     description: "",
@@ -27,27 +29,37 @@ function CustomOrdersPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (submitting) return;
 
-    await api.post("/custom-orders", {
-      ...form,
-      quantity: Number(form.quantity),
-      salePrice: Number(form.salePrice),
-      estimatedDate: form.estimatedDate || null,
-    });
+    try {
+      setSubmitting(true);
 
-    setForm({
-      productName: "",
-      description: "",
-      quantity: 1,
-      salePrice: 0,
-      clientName: "",
-      clientPhone: "",
-      estimatedDate: "",
-      status: "pending",
-      notes: "",
-    });
+      await api.post("/custom-orders", {
+        ...form,
+        quantity: Number(form.quantity),
+        salePrice: Number(form.salePrice),
+        estimatedDate: form.estimatedDate || null,
+      });
 
-    loadOrders();
+      setForm({
+        productName: "",
+        description: "",
+        quantity: 1,
+        salePrice: 0,
+        clientName: "",
+        clientPhone: "",
+        estimatedDate: "",
+        status: "pending",
+        notes: "",
+      });
+
+      await loadOrders();
+      alert("Pedido guardado correctamente");
+    } catch (error) {
+      alert(error?.response?.data?.message || "Error guardando pedido");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -127,7 +139,9 @@ function CustomOrdersPage() {
             onChange={(e) => setForm({ ...form, notes: e.target.value })}
           />
 
-          <button type="submit">Guardar pedido</button>
+          <button type="submit" disabled={submitting}>
+            {submitting ? "Guardando..." : "Guardar pedido"}
+          </button>
         </form>
 
         <div className="table-card">
@@ -152,7 +166,7 @@ function CustomOrdersPage() {
                     <td>{item.quantity}</td>
                     <td>${item.salePrice}</td>
                     <td>{item.clientName || "-"}</td>
-                    <td>{item.status}</td>
+                    <td>{getCustomOrderStatusLabel(item.status)}</td>
                   </tr>
                 ))}
               </tbody>
