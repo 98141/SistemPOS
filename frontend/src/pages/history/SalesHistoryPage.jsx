@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import api from "../../api/axios";
 import { exportSalesToPdf } from "../../utils/exportSalesToPDF";
 import Pagination from "../../components/common/Pagination";
-import { getPaymentMethodLabel, getMovementTypeLabel } from "../../utils/labels";
+import { getPaymentMethodLabel } from "../../utils/labels";
+import { printSaleReceipt } from "../../utils/printSaleReceipt";
 import "./SalesHistoryPage.css";
 
 function SalesHistoryPage() {
@@ -62,6 +63,7 @@ function SalesHistoryPage() {
   const handleFilter = async (e) => {
     e.preventDefault();
     await loadSales();
+    setCurrentPage(1);
   };
 
   return (
@@ -160,6 +162,7 @@ function SalesHistoryPage() {
                 <th>Pago</th>
                 <th>Items</th>
                 <th>Acción</th>
+                <th>Imprimir</th>
               </tr>
             </thead>
             <tbody>
@@ -170,7 +173,7 @@ function SalesHistoryPage() {
                   <td>${Number(sale.subtotal).toFixed(2)}</td>
                   <td>${Number(sale.discount).toFixed(2)}</td>
                   <td>${Number(sale.total).toFixed(2)}</td>
-                  <td>{sale.paymentMethod}</td>
+                  <td>{getPaymentMethodLabel(sale.paymentMethod)}</td>
                   <td>{sale.items.length}</td>
                   <td>
                     <button
@@ -179,6 +182,15 @@ function SalesHistoryPage() {
                       onClick={() => setSelectedSale(sale)}
                     >
                       Ver detalle
+                    </button>
+                  </td>
+                  <td>
+                    <button
+                      type="button"
+                      className="print-btn"
+                      onClick={() => printSaleReceipt(sale)}
+                    >
+                      Imprimir
                     </button>
                   </td>
                 </tr>
@@ -194,6 +206,12 @@ function SalesHistoryPage() {
             </tbody>
           </table>
         </div>
+
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
       </div>
 
       {selectedSale && (
@@ -211,7 +229,7 @@ function SalesHistoryPage() {
 
             <div className="history-modal__body">
               <p><strong>Fecha:</strong> {new Date(selectedSale.date).toLocaleString("es-CO")}</p>
-              <p><strong>Método de pago:</strong> {selectedSale.paymentMethod}</p>
+              <p><strong>Método de pago:</strong> {getPaymentMethodLabel(selectedSale.paymentMethod)}</p>
               <p><strong>Observaciones:</strong> {selectedSale.notes || "-"}</p>
 
               <div className="table-responsive">
