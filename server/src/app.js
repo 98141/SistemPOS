@@ -21,7 +21,10 @@ const app = express();
 
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    origin: [
+      "http://localhost:5173",
+      "https://sistem-nh3095j9y-armandos-projects-bfbd3d28.vercel.app"
+    ],
     credentials: false,
   })
 );
