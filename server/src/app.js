@@ -1,3 +1,6 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
@@ -9,6 +12,7 @@ import purchaseRoutes from "./routes/purchaseRoutes.js";
 import saleRoutes from "./routes/saleRoutes.js";
 import customOrderRoutes from "./routes/customOrderRoutes.js";
 import reportRoutes from "./routes/reportRoutes.js";
+import inventoryRoutes from "./routes/inventoryRoutes.js";
 
 import { notFound } from "./middlewares/notFound.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
@@ -17,7 +21,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL,
+    origin: process.env.FRONTEND_URL || "http://localhost:5173",
     credentials: false,
   })
 );
@@ -37,6 +41,7 @@ app.use("/api/purchases", purchaseRoutes);
 app.use("/api/sales", saleRoutes);
 app.use("/api/custom-orders", customOrderRoutes);
 app.use("/api/reports", reportRoutes);
+app.use("/api/inventory", inventoryRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

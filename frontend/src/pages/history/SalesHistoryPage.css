@@ -160,6 +160,15 @@
   cursor: pointer;
 }
 
+.print-btn {
+  border: none;
+  background: #16a34a;
+  color: #fff;
+  padding: 10px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
 @media (max-width: 1024px) {
   .history-summary-grid {
     grid-template-columns: 1fr;

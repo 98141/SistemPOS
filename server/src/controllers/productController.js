@@ -3,6 +3,52 @@ import Product from "../models/Product.js";
 import Category from "../models/Category.js";
 import InventoryMovement from "../models/InventoryMovement.js";
 
+const normalizeVariables = (variables = []) => {
+  if (!Array.isArray(variables)) return [];
+
+  const cleaned = variables
+    .map((item) => ({
+      key: String(item?.key || "").trim().toLowerCase(),
+      value: String(item?.value || "").trim(),
+    }))
+    .filter((item) => item.key && item.value);
+
+  const seen = new Set();
+  const unique = [];
+
+  for (const item of cleaned) {
+    const signature = `${item.key}::${item.value.toLowerCase()}`;
+    if (!seen.has(signature)) {
+      seen.add(signature);
+      unique.push(item);
+    }
+  }
+
+  return unique;
+};
+
+const validateVariables = (variables = []) => {
+  const keyCount = new Map();
+
+  for (const item of variables) {
+    if (item.key.length > 50) {
+      throw new Error(`La variable "${item.key}" supera el máximo permitido`);
+    }
+
+    if (item.value.length > 100) {
+      throw new Error(`El valor de la variable "${item.key}" supera el máximo permitido`);
+    }
+
+    keyCount.set(item.key, (keyCount.get(item.key) || 0) + 1);
+  }
+
+  for (const [key, count] of keyCount.entries()) {
+    if (count > 1) {
+      throw new Error(`La clave de variable "${key}" no debe repetirse`);
+    }
+  }
+};
+
 export const createProduct = async (req, res, next) => {
   try {
     const errors = validationResult(req);
@@ -35,15 +81,18 @@ export const createProduct = async (req, res, next) => {
       throw new Error("La categoría no existe");
     }
 
+    const normalizedVariables = normalizeVariables(variables);
+    validateVariables(normalizedVariables);
+
     const product = await Product.create({
       sku: sku.trim().toUpperCase(),
       name: name.trim(),
       category,
-      stock,
-      purchasePrice,
+      stock: Number(stock),
+      purchasePrice: Number(purchasePrice),
       unitMeasure: unitMeasure.trim(),
-      minStock: minStock || 0,
-      variables: Array.isArray(variables) ? variables : [],
+      minStock: Number(minStock) || 0,
+      variables: normalizedVariables,
       description: description?.trim() || "",
     });
 

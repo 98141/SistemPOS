@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import api from "../../api/axios";
+import { printSaleReceipt } from "../../utils/printSaleReceipt";
 import "./SalesPage.css";
 
 function SalesPage() {
@@ -9,6 +10,7 @@ function SalesPage() {
   const [discount, setDiscount] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState("efectivo");
   const [notes, setNotes] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const loadProducts = async () => {
     const { data } = await api.get("/products");
@@ -37,7 +39,10 @@ function SalesPage() {
       setCart((prev) =>
         prev.map((item) =>
           item.product === product._id
-            ? { ...item, quantity: item.quantity + 1 }
+            ? {
+                ...item,
+                quantity: Math.min(Number(item.quantity) + 1, Number(product.stock)),
+              }
             : item
         )
       );
@@ -50,6 +55,7 @@ function SalesPage() {
         product: product._id,
         name: product.name,
         sku: product.sku,
+        unitMeasure: product.unitMeasure,
         stock: product.stock,
         quantity: 1,
         unitPrice: "",
@@ -59,9 +65,20 @@ function SalesPage() {
 
   const updateCartItem = (productId, field, value) => {
     setCart((prev) =>
-      prev.map((item) =>
-        item.product === productId ? { ...item, [field]: value } : item
-      )
+      prev.map((item) => {
+        if (item.product !== productId) return item;
+
+        if (field === "quantity") {
+          const qty = Number(value);
+          if (!Number.isFinite(qty)) return { ...item, quantity: value };
+          return {
+            ...item,
+            quantity: qty > item.stock ? item.stock : qty,
+          };
+        }
+
+        return { ...item, [field]: value };
+      })
     );
   };
 
@@ -77,6 +94,8 @@ function SalesPage() {
   const total = subtotal - Number(discount || 0);
 
   const handleSubmitSale = async () => {
+    if (submitting) return;
+
     const invalidItem = cart.find(
       (item) =>
         !item.unitPrice ||
@@ -85,28 +104,49 @@ function SalesPage() {
         Number(item.quantity) > Number(item.stock)
     );
 
+    if (cart.length === 0) {
+      alert("Agrega productos al carrito");
+      return;
+    }
+
     if (invalidItem) {
       alert("Revisa cantidades y precios del carrito");
       return;
     }
 
-    await api.post("/sales", {
-      items: cart.map((item) => ({
-        product: item.product,
-        quantity: Number(item.quantity),
-        unitPrice: Number(item.unitPrice),
-      })),
-      discount: Number(discount || 0),
-      paymentMethod,
-      notes,
-    });
+    if (total < 0) {
+      alert("El total no puede ser negativo");
+      return;
+    }
 
-    alert("Venta registrada correctamente");
-    setCart([]);
-    setDiscount(0);
-    setPaymentMethod("efectivo");
-    setNotes("");
-    loadProducts();
+    try {
+      setSubmitting(true);
+
+      const { data } = await api.post("/sales", {
+        items: cart.map((item) => ({
+          product: item.product,
+          quantity: Number(item.quantity),
+          unitPrice: Number(item.unitPrice),
+        })),
+        discount: Number(discount || 0),
+        paymentMethod,
+        notes,
+      });
+
+      alert("Venta registrada correctamente");
+
+      printSaleReceipt(data.data);
+
+      setCart([]);
+      setDiscount(0);
+      setPaymentMethod("efectivo");
+      setNotes("");
+      await loadProducts();
+    } catch (error) {
+      alert(error?.response?.data?.message || "Error registrando venta");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -130,6 +170,7 @@ function SalesPage() {
                   key={item._id}
                   className="product-item"
                   onClick={() => addToCart(item)}
+                  type="button"
                 >
                   <strong>{item.name}</strong>
                   <span>{item.sku}</span>
@@ -152,6 +193,9 @@ function SalesPage() {
                   <div className="cart-item__info">
                     <strong>{item.name}</strong>
                     <span>{item.sku}</span>
+                    <small>
+                      Disponible: {item.stock} {item.unitMeasure}
+                    </small>
                   </div>
 
                   <div className="cart-item__controls">
@@ -176,7 +220,9 @@ function SalesPage() {
                       }
                     />
 
-                    <button onClick={() => removeCartItem(item.product)}>Quitar</button>
+                    <button type="button" onClick={() => removeCartItem(item.product)}>
+                      Quitar
+                    </button>
                   </div>
                 </div>
               ))}
@@ -215,8 +261,13 @@ function SalesPage() {
                 <p>Total: ${total.toFixed(2)}</p>
               </div>
 
-              <button className="confirm-btn" onClick={handleSubmitSale}>
-                Confirmar venta
+              <button
+                className="confirm-btn"
+                onClick={handleSubmitSale}
+                disabled={submitting || cart.length === 0}
+                type="button"
+              >
+                {submitting ? "Procesando..." : "Confirmar venta"}
               </button>
             </div>
           </div>

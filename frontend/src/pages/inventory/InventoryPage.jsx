@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../../api/axios";
+import Pagination from "../../components/common/Pagination";
+import { getMovementTypeLabel } from "../../utils/labels";
 import "./InventoryPage.css";
 
 function InventoryPage() {
@@ -18,6 +20,8 @@ function InventoryPage() {
     quantity: "",
     note: "",
   });
+  const [currentMovementPage, setCurrentMovementPage] = useState(1);
+  const movementItemsPerPage = 12;
 
   const loadInventory = async () => {
     try {
@@ -62,6 +66,7 @@ function InventoryPage() {
   const handleMovementFilter = async (e) => {
     e.preventDefault();
     await loadMovements();
+    setCurrentMovementPage(1);
   };
 
   const handleAdjustStock = async (e) => {
@@ -98,6 +103,14 @@ function InventoryPage() {
       alert(error?.response?.data?.message || "Error ajustando stock");
     }
   };
+
+  const movementTotalPages =
+    Math.ceil(movements.length / movementItemsPerPage) || 1;
+
+  const paginatedMovements = movements.slice(
+    (currentMovementPage - 1) * movementItemsPerPage,
+    currentMovementPage * movementItemsPerPage
+  );
 
   return (
     <section className="inventory-page">
@@ -280,12 +293,12 @@ function InventoryPage() {
               </tr>
             </thead>
             <tbody>
-              {movements.map((item) => (
+              {paginatedMovements.map((item) => (
                 <tr key={item._id}>
                   <td>{new Date(item.createdAt).toLocaleString("es-CO")}</td>
                   <td>{item.product?.name || "-"}</td>
                   <td>{item.product?.sku || "-"}</td>
-                  <td>{item.type}</td>
+                  <td>{getMovementTypeLabel(item.type)}</td>
                   <td>{item.quantity}</td>
                   <td>{item.previousStock}</td>
                   <td>{item.newStock}</td>
@@ -304,6 +317,12 @@ function InventoryPage() {
             </tbody>
           </table>
         </div>
+
+        <Pagination
+          currentPage={currentMovementPage}
+          totalPages={movementTotalPages}
+          onPageChange={setCurrentMovementPage}
+        />
       </div>
     </section>
   );
